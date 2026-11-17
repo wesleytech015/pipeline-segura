@@ -1,0 +1,28 @@
+{
+  "name": "pipeline-segura",
+  "version": "1.0.0",
+  "description": "Projeto Pipeline Segura, uma API simples usada como base para demonstrar uma esteira DevSecOps automatizada.",
+  "main": "index.js",
+ "scripts": {
+  "start": "node src/app.js",
+  "dev": "nodemon src/app.js"
+},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wesleytech015/pipeline-segura.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/wesleytech015/pipeline-segura/issues"
+  },
+  "homepage": "https://github.com/wesleytech015/pipeline-segura#readme",
+  "dependencies": {
+    "express": "^5.3.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
