@@ -1,0 +1,38 @@
+name: Pipeline DevSecOps
+
+# Executa em pushes na main e em pull requests que têm a main como destino.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validacao:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Fazer checkout do repositório
+        uses: actions/checkout@v6
+
+      # O cache do npm usa o package-lock.json para compor a chave.
+      - name: Configurar Node.js 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Validar a sintaxe da aplicação
+        run: node --check src/app.js
+
+      - name: Iniciar e validar a API
+        run: |
+          npm start &
+          sleep 5
+          curl --fail http://localhost:3000/health
