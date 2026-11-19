@@ -34,6 +34,31 @@ jobs:
             semgrep/semgrep \
             semgrep scan --config p/javascript --error /src/src
 
+      - name: SBOM - Trivy CycloneDX
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: cyclonedx
+          output: sbom.cdx.json
+
+      - name: Publicar SBOM como artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-cyclonedx
+          path: sbom.cdx.json
+
+      - name: SCA - Trivy
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          exit-code: '1'
+          ignore-unfixed: true
+          format: table
+
       # O cache do npm usa o package-lock.json para compor a chave.
       - name: Configurar Node.js 24
         uses: actions/setup-node@v6
