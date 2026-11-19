@@ -59,6 +59,40 @@ jobs:
           ignore-unfixed: true
           format: table
 
+      - name: Build da imagem Docker
+        run: docker build -t pipeline-segura-api:ci .
+
+      - name: Container Scan - Trivy
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: pipeline-segura-api:ci
+          format: table
+          severity: HIGH,CRITICAL
+          exit-code: '1'
+          ignore-unfixed: true
+
+      - name: IaC Security - Docker Compose
+        shell: bash
+        run: |
+          docker compose -f docker-compose.yml config --format json |
+            jq -e 'all(.services[];
+              (.privileged != true) and
+              (.network_mode != "host") and
+              all(.volumes[]?;
+                .source != "/var/run/docker.sock" and
+                .source != "/run/docker.sock"
+              )
+            )'
+
+      - name: IaC Security - Checkov
+        run: |
+          docker run --rm \
+            -v "$GITHUB_WORKSPACE:/workspace" \
+            bridgecrew/checkov \
+            -d /workspace \
+            --framework dockerfile \
+            --quiet
+
       # O cache do npm usa o package-lock.json para compor a chave.
       - name: Configurar Node.js 24
         uses: actions/setup-node@v6
