@@ -106,8 +106,56 @@ jobs:
       - name: Validar a sintaxe da aplicação
         run: node --check src/app.js
 
+      - name: Iniciar aplica??o para DAST
+        run: |
+          docker run -d \
+            --name pipeline-segura-dast \
+            -p 127.0.0.1:3000:3000 \
+            pipeline-segura-api:ci
+
+          for i in {1..15}; do
+            if curl --fail --silent --max-time 2 http://127.0.0.1:3000/health; then
+              echo "API pronta para o DAST"
+              exit 0
+            fi
+            sleep 2
+          done
+
+          echo "API n?o iniciou corretamente"
+          docker logs pipeline-segura-dast
+          exit 1
+
+      - name: DAST - OWASP ZAP
+        run: |
+          workspace_mode=$(stat -c '%a' "$GITHUB_WORKSPACE")
+          trap 'chmod "$workspace_mode" "$GITHUB_WORKSPACE"; docker stop pipeline-segura-dast' EXIT
+          chmod a+w "$GITHUB_WORKSPACE"
+
+          docker run --rm \
+            --network host \
+            -v "$GITHUB_WORKSPACE:/zap/wrk/:rw" \
+            ghcr.io/zaproxy/zaproxy:stable \
+            zap-baseline.py \
+            -t http://127.0.0.1:3000 \
+            -r zap-report.html \
+            -J zap-report.json \
+            -I
+
+      - name: Publicar relat?rios do ZAP
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-dast-report
+          path: |
+            zap-report.html
+            zap-report.json
+
       - name: Iniciar e validar a API
         run: |
           npm start &
           sleep 5
           curl --fail http://localhost:3000/health
+
+      - name: Encerrar aplica??o DAST
+        if: always()
+        run: docker rm -f pipeline-segura-dast || true
