@@ -3,7 +3,7 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const API_KEY = "ghp_1234567890abcdefghijklmnopqrstuvwxyz";
+const TEST_SECRET = "SEGREDO_TESTE_123456";
 
 app.use(express.json());
 

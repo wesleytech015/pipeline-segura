@@ -1,0 +1,4 @@
+[[rules]]
+id = "segredo-ficticio-academico"
+description = "Detecta segredo fictício usado na demonstração do Security Gate"
+regex = '''TEST_SECRET\s*=\s*["'][A-Za-z0-9_-]{10,}["']'''
