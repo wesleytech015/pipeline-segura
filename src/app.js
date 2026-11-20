@@ -3,7 +3,6 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const TEST_SECRET = "SEGREDO_TESTE_123456";
 // Segredo fictício removido após validação do Security Gate.
 
 app.use(express.json());
